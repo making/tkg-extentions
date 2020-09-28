@@ -1,3 +1,5 @@
+#@ load("@ytt:data", "data")
+---
 apiVersion: cert-manager.io/v1alpha2
 kind: Issuer
 metadata:
@@ -26,9 +28,7 @@ spec:
   # At least one of a DNS Name, USI SAN, or IP address is required.
   dnsNames:
   - tkg-dex
-  ipAddresses:
-    - <MGMT_CLUSTER_IP1>
-    - <MGMT_CLUSTER_IP2>
+  ipAddresses: #@ data.values.mgmt_cluster_ips
   # Issuer references are always required.
   issuerRef:
     name: dex-ca-issuer

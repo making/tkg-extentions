@@ -1,3 +1,5 @@
+#@ load("@ytt:data", "data")
+---
 kind: Service
 apiVersion: v1
 metadata:
@@ -6,7 +8,7 @@ metadata:
   labels:
     app: gangway
 spec:
-  type: NodePort
+  type: #@ data.values.gangway_service_type
   ports:
     - name: "https"
       protocol: TCP

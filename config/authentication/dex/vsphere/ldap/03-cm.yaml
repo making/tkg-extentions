@@ -1,11 +1,14 @@
+#@ load("@ytt:data", "data")
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: dex
   namespace: tanzu-system-auth
 data:
+  #@yaml/text-templated-strings
   config.yaml: |
-    issuer: https://<MGMT_CLUSTER_IP>:30167
+    issuer: https://(@= data.values.mgmt_cluster_ips[0] @):30167
     frontend:
       theme: tkg
     web:
@@ -19,7 +22,12 @@ data:
       level: "debug"
       format: "json"
 
-    staticClients: []
+    staticClients:
+    - id: (@= data.values.workload_cluster_name @)
+      redirectURIs:
+      - (@= "https://{}:30166/callback".format(data.values.workload_cluster_ips[0]) @)
+      name: (@= data.values.workload_cluster_name @)
+      secret: (@= data.values.gangway_client_secret @)
     connectors:
     - type: ldap
       # Required field for connector id.
@@ -31,7 +39,7 @@ data:
         # If the port is not supplied, it will be guessed based on "insecureNoSSL",
         # and "startTLS" flags. 389 for insecure or StartTLS connections, 636
         # otherwise.
-        host: <LDAP_HOST>
+        host: (@= data.values.ldap_host @)
 
         # Following field is required if the LDAP host is not using TLS (port 389).
         # Because this option inherently leaks passwords to anyone on the same network
@@ -61,8 +69,8 @@ data:
         # server provides access for anonymous auth.
         # Please note that if the bind password contains a `$`, it has to be saved in an
         # environment variable which should be given as the value to `bindPW`.
-        # bindDN: uid=serviceaccount,cn=users,dc=vmware,dc=com
-        # bindPW: password
+        bindDN: (@= data.values.ldap_bind_dn @)
+        bindPW: (@= data.values.ldap_bind_pw @)
 
         # The attribute to display in the provided password prompt. If unset, will
         # display "Username"
@@ -72,35 +80,35 @@ data:
         userSearch:
           # BaseDN to start the search from. It will translate to the query
           # "(&(objectClass=person)(uid=<username>))".
-          baseDN: ou=people,dc=vmware,dc=com
+          baseDN: (@= data.values.ldap_user_search_base_dn @)
           # Optional filter to apply when searching the directory.
-          filter: "(objectClass=posixAccount)"
+          filter: "(objectClass=person)"
 
           # username attribute used for comparing user entries. This will be translated
           # and combined with the other filter as "(<attr>=<username>)".
-          username: uid
+          username: (@= data.values.ldap_user_search_username @)
           # The following three fields are direct mappings of attributes on the user entry.
           # String representation of the user.
-          idAttr: uid
+          idAttr: (@= data.values.ldap_user_search_id_attr @)
           # Required. Attribute to map to Email.
-          emailAttr: mail
+          emailAttr: (@= data.values.ldap_user_search_email_attr @)
           # Maps to display name of users. No default value.
-          nameAttr: givenName
+          nameAttr: (@= data.values.ldap_user_search_name_attr @)
 
         # Group search queries for groups given a user entry.
         groupSearch:
           # BaseDN to start the search from. It will translate to the query
           # "(&(objectClass=group)(member=<user uid>))".
-          baseDN: ou=group,dc=vmware,dc=com
+          baseDN: (@= data.values.ldap_group_search_base_dn @)
           # Optional filter to apply when searching the directory.
-          filter: "(objectClass=posixGroup)"
+          filter: "(objectClass=groupOfNames)"
 
           # Following two fields are used to match a user to a group. It adds an additional
           # requirement to the filter that an attribute in the group must match the user's
           # attribute value.
-          userAttr: uid
-          groupAttr: memberUid
-          nameAttr: cn
+          userAttr: (@= data.values.ldap_group_search_user_attr @)
+          groupAttr: (@= data.values.ldap_group_search_group_attr @)
+          nameAttr: (@= data.values.ldap_group_search_name_attr @)
         
     oauth2:
       skipApprovalScreen: true

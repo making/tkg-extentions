@@ -1,9 +1,12 @@
+#@ load("@ytt:data", "data")
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: gangway
   namespace: tanzu-system-auth
 data:
+  #@yaml/text-templated-strings
   gangway.yaml: |
     # The address to listen on. Defaults to 0.0.0.0 to listen on all interfaces.
     # Env var: GANGWAY_HOST
@@ -28,15 +31,15 @@ data:
 
     # The cluster name. Used in UI and kubectl config instructions.
     # Env var: GANGWAY_CLUSTER_NAME
-    clusterName: "<WORKLOAD_CLUSTER_NAME>"
+    clusterName: "(@= data.values.workload_cluster_name @)"
 
     # OAuth2 URL to start authorization flow.
     # Env var: GANGWAY_AUTHORIZE_URL
-    authorizeURL: "https://<MGMT_CLUSTER_IP>:30167/auth"
+    authorizeURL: "https://(@= data.values.mgmt_cluster_ips[0] @):30167/auth"
 
     # OAuth2 URL to obtain access tokens.
     # Env var: GANGWAY_TOKEN_URL
-    tokenURL: "https://<MGMT_CLUSTER_IP>:30167/token"
+    tokenURL: "https://(@= data.values.mgmt_cluster_ips[0] @):30167/token"
 
     # Endpoint that provides user profile information [optional]. Not all providers
     # will require this.
@@ -51,11 +54,11 @@ data:
     # Typically this also needs to be registered as part of the oauth application
     # with the oAuth provider.
     # Env var: GANGWAY_REDIRECT_URL
-    redirectURL: "https://<WORKLOAD_CLUSTER_IP>:30166/callback"
+    redirectURL: "https://(@= data.values.workload_cluster_ips[0] @):30166/callback"
 
     # API client ID as indicated by the identity provider
     # Env var: GANGWAY_CLIENT_ID
-    clientID: "<WORKLOAD_CLUSTER_NAME>"
+    clientID: "(@= data.values.workload_cluster_name @)"
 
     # Some identity providers accept an empty client secret, this
     # is not generally considered a good idea. If you have to use an
@@ -71,7 +74,7 @@ data:
 
     # The API server endpoint used to configure kubectl
     # Env var: GANGWAY_APISERVER_URL
-    apiServerURL: "https://<APISERVER_URL>:6443/"
+    apiServerURL: "https://(@= data.values.apiserver_url @):6443/"
 
     # The path to find the CA bundle for the API server. Used to configure kubectl.
     # This is typically mounted into the default location for workloads running on

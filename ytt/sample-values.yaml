@@ -1,0 +1,26 @@
+#@data/values
+---
+mgmt_cluster_ips: ["10.213.173.209"]
+ldap_host: ldap.example.com:636
+ldap_bind_dn: cn=admin,dc=ik,dc=am
+ldap_bind_pw: ..............
+ldap_user_search_base_dn: ou=people,dc=ik,dc=am
+ldap_user_search_username: cn
+ldap_user_search_name_attr: cn
+ldap_user_search_email_attr: mail
+ldap_user_search_id_attr: cn
+ldap_group_search_base_dn: ou=groups,dc=ik,dc=am
+ldap_group_search_user_attr: DN
+ldap_group_search_group_attr: member
+ldap_group_search_name_attr: cn
+dex_service_type: NodePort
+workload_cluster_name: playground
+workload_cluster_ips: ["10.213.173.218"]
+apiserver_url: 10.213.173.216
+gangway_service_type: NodePort
+gangway_session_key_base64: ...
+gangway_client_secret: ...
+dex_ca: |
+  -----BEGIN CERTIFICATE-----
+  ....
+  -----END CERTIFICATE-----

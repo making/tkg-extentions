@@ -1,3 +1,5 @@
+#@ load("@ytt:data", "data")
+---
 apiVersion: cert-manager.io/v1alpha2
 kind: Issuer
 metadata:
@@ -26,9 +28,7 @@ spec:
   # At least one of a DNS Name, USI SAN, or IP address is required.
   dnsNames:
     - tkg-gangway
-  ipAddresses:
-    - <WORKLOAD_CLUSTER_IP1>
-    - <WORKLOAD_CLUSTER_IP2>
+  ipAddresses: #@ data.values.workload_cluster_ips
   # Issuer references are always required.
   issuerRef:
     name: gangway-ca-issuer
